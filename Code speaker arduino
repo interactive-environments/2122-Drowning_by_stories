@@ -1,0 +1,32 @@
+```arduino
+#include "Arduino.h"
+#include "SoftwareSerial.h"
+#include "DFRobotDFPlayerMini.h"
+
+SoftwareSerial mySoftwareSerial(10, 11); 
+DFRobotDFPlayerMini myDFPlayer;
+
+const int buttonPin = 2;
+int buttonState = 0;
+
+void setup()
+{
+  mySoftwareSerial.begin(9600);
+  Serial.begin(115200);
+  pinMode(buttonPin, INPUT);
+
+  if (!myDFPlayer.begin(mySoftwareSerial)) {  //Use softwareSerial to communicate with mp3.
+    while(true);
+  } 
+}
+
+void loop()
+{
+  buttonState = digitalRead(buttonPin);
+   if (buttonState == HIGH) {
+    myDFPlayer.volume(10);  //Set volume value. From 0 to 30
+    myDFPlayer.play(6);  //Play the first mp3
+      
+    }
+  
+}
