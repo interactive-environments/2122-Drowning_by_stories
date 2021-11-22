@@ -1,0 +1,21 @@
+import board
+import time
+from digitalio import DigitalInOut, Direction
+from DFPlayer import DFPlayer
+
+PLAYER_VOL   = 80
+# PLAYER_RX  = board.RX   # board.D3
+# PLAYER_TX  = board.TX   # board.D4
+
+dfplayer = DFPlayer(volume=PLAYER_VOL)    
+
+
+switch = DigitalInOut(board.D2)
+switch.direction = Direction.INPUT
+
+
+while True:
+    if switch.value:
+        if dfplayer.get_status() != DFPlayer.STATUS_BUSY:
+            print("switching to next song")
+            dfplayer.play()
