@@ -1,0 +1,52 @@
+import time
+import board
+import busio
+import p9813
+
+
+# Import MPR121 module.
+import adafruit_mpr121
+
+
+# setup Touch
+i2c = busio.I2C(board.SCL, board.SDA)
+mpr121 = adafruit_mpr121.MPR121(i2c)
+
+# setup chainable LEDs
+led1C = board.A0
+led1D = board.A1
+numLeds1 = 1
+chain1 = p9813.P9813(led1C, led1D, numLeds1)
+
+def fade(x, y, z):
+    for i in range(x, y, z):
+        chain1[0] = (255, i, 0)
+        chain1.write()
+        time.sleep(0.01)
+        if not (mpr121[2].value or mpr121[3].value):
+            break
+
+def fade1(x, y, z):
+    for i in range(x, y, z):
+        chain1[0] = (0, 255, i)
+        chain1.write()
+        time.sleep(0.01)
+        check()
+
+def check():
+    if mpr121[2].value or mpr121[3].value:
+        print('boe')
+        fade(140, 255, 1)
+        fade(255, 140, -1)
+        time.sleep(0.01)
+
+
+
+# Loop forever testing each input and printing when they're touched.
+while True:
+    fade1(127, 255, 1)
+    fade1(255, 127, -1)
+
+
+
+
