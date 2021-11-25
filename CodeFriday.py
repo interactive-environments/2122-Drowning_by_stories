@@ -51,7 +51,8 @@ def fade1(x, y, z):
 # Checks if the touch sensor is being touched
 def check():
     if mpr121[2].value or mpr121[3].value:
-        return true
+        print("boe")
+        return True
 
 def ButtonPress():
     # If button1 is pressed play a story
@@ -62,8 +63,8 @@ def ButtonPress():
 
 while True:
     # Start fading
-    fade1(127, 255, 1)
-    fade1(255, 127, -1)
+    fade1(50, 255, 1)
+    fade1(255, 50, -1)
 
 
 
