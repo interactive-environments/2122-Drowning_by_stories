@@ -1,0 +1,35 @@
+import board
+import time
+from digitalio import DigitalInOut, Direction
+
+
+DFP_VOL   = 5
+
+DFP_NEXT_PIN = board.D3
+DFP_BUSY_PIN = board.D4
+
+
+dfp_next           = DigitalInOut(DFP_NEXT_PIN)  # connect to IO2 of dfplayer
+dfp_next.direction = Direction.OUTPUT
+dfp_busy           = DigitalInOut(DFP_BUSY_PIN)  # connect to BUSY of dfplayer
+dfp_busy.direction = Direction.INPUT
+
+
+#dfplayer = DFPlayer(volume=PLAYER_VOL)    
+
+
+switch = DigitalInOut(board.D2)
+switch.direction = Direction.INPUT
+
+
+while True:
+    if switch.value:
+          if dfp_busy.value:             # high: not playing: skip to next song
+            print("switching to next song")
+            dfp_next.value = 0
+            time.sleep(0.1)
+            dfp_next.value = 1
+            time.sleep(0.1)   
+        
+            
+            
