@@ -4,19 +4,23 @@ from digitalio import DigitalInOut, Direction
 from DFPlayer import DFPlayer
 
 # Setup speaker
-DFP_NEXT_PIN = board.D3 # attach to RX
-DFP_BUSY_PIN = board.D4 # attach to TX
+DFP_NEXT_PIN = board.D0 # attach to RX
+DFP_BUSY_PIN = board.D1 # attach to TX
 
 # Setup volume
-PLAYER_VOL   = 30
+PLAYER_VOL   = 40
 dfplayer = DFPlayer(volume=PLAYER_VOL)
 
 # Setup button
 button = DigitalInOut(board.D2)
 button.direction = Direction.INPUT
 
+button1 = DigitalInOut(board.D3)
+button1.direction = Direction.INPUT
 
 while True:
     if button.value:
-        dfplayer.play(track=0)
+        dfplayer.play(track=1)
+    if button1.value:
+        dfplayer.play(track=2)
         
