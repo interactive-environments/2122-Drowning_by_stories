@@ -43,6 +43,7 @@ def idle(x, y, z):
         if touched():
             dfplayer.set_volume(percent=100)
             dfplayer.play(track=1)
+            dfplayer.set_volume(percent=40)
             fade(140, 255, 1)
             fade(255, 140, -1)
 
