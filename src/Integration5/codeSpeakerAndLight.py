@@ -10,6 +10,10 @@ import adafruit_mpr121
 i2c = busio.I2C(board.SCL, board.SDA)
 mpr121 = adafruit_mpr121.MPR121(i2c)
 
+# Setup speaker
+DFP_NEXT_PIN = board.D0 # attach to RX
+DFP_BUSY_PIN = board.D1 # attach to TX
+
 # Setup volume
 PLAYER_VOL = 40
 dfplayer = DFPlayer(volume=PLAYER_VOL)
