@@ -31,7 +31,7 @@ def fade(x, y, z):
         if not touched():
             dfplayer.stop()
             break
-        playStory(2, 6)
+        playStory(2, 7)
 
 
 # Fade from blue to turqoise
