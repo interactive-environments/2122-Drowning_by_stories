@@ -28,7 +28,7 @@ i2c = busio.I2C(board.SCL, board.SDA)
 mpr121 = adafruit_mpr121.MPR121(i2c)
 
 # Setup dfplayer
-PLAYER_VOL = 40
+PLAYER_VOL = 50
 dfplayer = DFPlayer(volume=PLAYER_VOL)
 
 # Setup chainable LED
@@ -37,19 +37,31 @@ led1D = board.A1
 numLeds1 = 1
 chain = p9813.P9813(led1C, led1D, numLeds1)
 
+currZone = None
+flag = False
+
 # ---------------------------------------------End Setup--------------------------------
 
 # Fade from yellow to orange
 def fade(x, y, z):
+    global flag, currZone
     for i in range(x, y, z):
         chain[0] = (255, i, 0)
         chain.write()
         time.sleep(0.01)
         if not touched():
             dfplayer.stop()
+            flag = False
             break
+        if not flag:
+            playConfirmation()
+            if currZone == 'NODE2':
+                playStory(2, 4)
+                flag = True
+            if currZone == 'NODE1':
+                playStory(5, 7)
+                flag = True
         checkNetwork()
-
 
 # Fade from blue to turqoise
 def idle(x, y, z):
@@ -58,9 +70,6 @@ def idle(x, y, z):
         chain.write()
         time.sleep(0.01)
         if touched():
-            dfplayer.set_volume(percent=100)
-            dfplayer.play(track=1)
-            dfplayer.set_volume(percent=40)
             fade(140, 255, 1)
             fade(255, 140, -1)
 
@@ -87,27 +96,48 @@ def playStory(a, b):
     i = random.randint(a, b)
     dfplayer.play(track=i)
     print("Play story")
+    
+# Plays the confirmation sound
+def playConfirmation():
+    dfplayer.set_volume(percent=50)
+    dfplayer.play(track=1)
+    time.sleep(2)
+    dfplayer.set_volume(percent=40)
 
 # Plays the story that corresponds to the closest network
 def checkNetwork():
+    global currZone
     closest = None
     closest_rssi = -80
 
     # Check if the curren broadcaster is still the closest
     for entry in esp.scan_networks():
-        if str(entry["ssid"], "utf-8") == closest:
-            pass
-        elif entry["rssi"] > closest_rssi:
-            closest = str(entry["ssid"], "utf-8")
-        else:
-            continue
-        closest_rssi = entry["rssi"]
+        if not touched():
+            dfplayer.stop()
+            flag = False
+            return
+        if str(entry["ssid"], "utf-8") == 'NODE2' or str(entry["ssid"], "utf-8") == 'NODE1':
+            now = time.monotonic()
+            new = False
+            if str(entry["ssid"], "utf-8") == closest:
+                pass
+            elif entry["rssi"] > closest_rssi:
+                closest = str(entry["ssid"], "utf-8")
+                closest_rssi = entry["rssi"]
+            else:
+                continue
 
-        # Play story of the story pool of the current broadcaster
-        if closest == 'iPhone':
-            playStory(2, 4)
-        if closest == 'GNX7DE3F7':
-            playStory(5, 7)
+    print(closest)
+    print(currZone)
+    # Set LED to the colour of the current broadcaster. Red for Iphone and blue for GNX7DE3F7
+    if closest == 'NODE2'and closest is not currZone:
+        playConfirmation()
+        playStory(2, 4)
+    if closest == 'NODE1'and closest is not currZone:
+        playConfirmation()
+        playStory(5, 7)
+    currZone = closest
+
 
 # ---------------------------------------------End helper methods-----------------------
 
@@ -119,4 +149,3 @@ for ap in esp.scan_networks():
 while True:
     idle(50, 255, 1)
     idle(255, 50, -1)
-
