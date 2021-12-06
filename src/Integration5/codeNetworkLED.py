@@ -27,38 +27,33 @@ requests.set_socket(socket, esp)
 for ap in esp.scan_networks():
     print("\t%s\t\tRSSI: %d" % (str(ap["ssid"], "utf-8"), ap["rssi"]))
 
+print("Scanning for storysets")
+
 # Listening
 while True:
     closest = None
     closest_rssi = -80
-    closest_last_time = 0
-    # print("Scanning for storysets")
-
+    
     # Check if the curren broadcaster is still the closest
     for entry in esp.scan_networks():
-        print(closest)
-        print(closest_rssi)
-        now = time.monotonic()
-        new = False
-        if str(entry["ssid"], "utf-8") == closest:
-            pass
-        elif entry["rssi"] > closest_rssi or now - closest_last_time > 0.4:
-            closest = str(entry["ssid"], "utf-8")
-        else:
-            continue
-        closest_rssi = entry["rssi"]
-        closest_last_time = now
+        if str(entry["ssid"], "utf-8") == 'NODE2' or str(entry["ssid"], "utf-8") == 'NODE1':
+            now = time.monotonic()
+            new = False
+            if str(entry["ssid"], "utf-8") == closest:
+                pass
+            elif entry["rssi"] > closest_rssi:
+                closest = str(entry["ssid"], "utf-8")
+                closest_rssi = entry["rssi"]
+            else:
+                continue
 
-        # Set LED to the colour of the current broadcaster. Red for Iphone and blue for GNX7DE3F7
-        if closest == 'iPhone':
-            led[0] = (255, 0, 0)
-            time.sleep(0.5)
-        if closest == 'GNX7DE3F7':
-            led[0] = (0, 0, 255)
-            time.sleep(0.5)
+    print(closest)
+    # Set LED to the colour of the current broadcaster. Red for Iphone and blue for GNX7DE3F7
+    if closest == 'NODE2':
+        led[0] = (255, 0, 0)
+        time.sleep(0.5)
+    if closest == 'NODE1':
+        led[0] = (0, 0, 255)
+        time.sleep(0.5)
+        
 
-        # Clear the LED if we haven't heard from anything recently.
-        now = time.monotonic()
-        if now - closest_last_time > 1:
-            led[0] = (0, 0, 0)
-            time.sleep(0.5)
