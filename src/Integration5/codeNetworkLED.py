@@ -1,64 +1,87 @@
 import board
-import busio
 import time
-from digitalio import DigitalInOut
-import adafruit_requests as requests
-import adafruit_esp32spi.adafruit_esp32spi_socket as socket
-from adafruit_esp32spi import adafruit_esp32spi
-import adafruit_dotstar
+import busio
+import random
+from DFPlayer import DFPlayer
+import p9813
+import adafruit_mpr121
 
-# Setup internal LED
-led = adafruit_dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1)
-led.brightness = 0.3
+# Setup touch sensor
+i2c = busio.I2C(board.SCL, board.SDA)
+mpr121 = adafruit_mpr121.MPR121(i2c)
 
-# Setup esp32
-esp32_cs = DigitalInOut(board.D9)
-esp32_ready = DigitalInOut(board.D11)
-esp32_reset = DigitalInOut(board.D12)
+# Setup volume
+PLAYER_VOL = 40
+dfplayer = DFPlayer(volume=PLAYER_VOL)
 
-# Initiate spi & esp32
-spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
-esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
+# Setup chainable LED
+led1C = board.A0
+led1D = board.A1
+numLeds1 = 1
+chain = p9813.P9813(led1C, led1D, numLeds1)
 
-# Request to set a socket with the esp value
-requests.set_socket(socket, esp)
+flag = False
 
-# Scan the network for all the wifi networks
-for ap in esp.scan_networks():
-    print("\t%s\t\tRSSI: %d" % (str(ap["ssid"], "utf-8"), ap["rssi"]))
+# ---------------------------------------------End Setup--------------------------------
 
-# Listening
+# Fade from yellow to orange
+def fade(x, y, z):
+    global flag
+    for i in range(x, y, z):
+        print("la")
+        chain[0] = (255, i, 0)
+        chain.write()
+        time.sleep(0.01)
+        if not touched():
+            print("stop")
+            dfplayer.stop()
+            flag = False
+            break
+        elif not flag: 
+            playStory(2, 7)
+            flag = True
+
+
+# Fade from blue to turqoise
+def idle(x, y, z):
+    global touch
+    for i in range(x, y, z):
+        chain[0] = (0, 255, i)
+        chain.write()
+        time.sleep(0.01)
+        if touched():
+            print("bla")
+            dfplayer.set_volume(percent=100)
+            dfplayer.play(track=1)
+            dfplayer.set_volume(percent=40)
+            time.sleep(2)
+            fade(140, 255, 1)
+            fade(255, 140, -1)
+
+# Returns true when the touch sensor is being touched
+def touched():
+    if (
+        mpr121[0].value
+        or mpr121[1].value
+        or mpr121[2].value
+        or mpr121[3].value
+        or mpr121[8].value
+        or mpr121[9].value
+        or mpr121[10].value
+        or mpr121[11].value
+    ):
+        return True
+
+
+# Chooses a story randomly out of the given range and plays that story
+# a = from
+# b = to
+def playStory(a, b):
+    i = random.randint(a, b)
+    dfplayer.play(track=i)
+    print("Play story")
+
+
 while True:
-    closest = None
-    closest_rssi = -80
-    closest_last_time = 0
-    # print("Scanning for storysets")
-
-    # Check if the curren broadcaster is still the closest
-    for entry in esp.scan_networks():
-        print(closest)
-        print(closest_rssi)
-        now = time.monotonic()
-        new = False
-        if str(entry["ssid"], "utf-8") == closest:
-            pass
-        elif entry["rssi"] > closest_rssi or now - closest_last_time > 0.4:
-            closest = str(entry["ssid"], "utf-8")
-        else:
-            continue
-        closest_rssi = entry["rssi"]
-        closest_last_time = now
-
-        # Set LED to the colour of the current broadcaster. Red for Iphone and blue for GNX7DE3F7
-        if closest == 'iPhone':
-            led[0] = (255, 0, 0)
-            time.sleep(0.5)
-        if closest == 'GNX7DE3F7':
-            led[0] = (0, 0, 255)
-            time.sleep(0.5)
-
-        # Clear the LED if we haven't heard from anything recently.
-        now = time.monotonic()
-        if now - closest_last_time > 1:
-            led[0] = (0, 0, 0)
-            time.sleep(0.5)
+    idle(50, 255, 1)
+    idle(255, 50, -1)
