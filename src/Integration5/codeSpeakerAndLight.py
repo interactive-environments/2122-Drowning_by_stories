@@ -15,7 +15,7 @@ DFP_NEXT_PIN = board.D0 # attach to RX
 DFP_BUSY_PIN = board.D1 # attach to TX
 
 # Setup volume
-PLAYER_VOL = 40
+PLAYER_VOL = 100
 dfplayer = DFPlayer(volume=PLAYER_VOL)
 
 # Setup chainable LED
@@ -24,18 +24,26 @@ led1D = board.A1
 numLeds1 = 1
 chain = p9813.P9813(led1C, led1D, numLeds1)
 
+flag = False;
+
 # ---------------------------------------------End Setup--------------------------------
 
 # Fade from yellow to orange
 def fade(x, y, z):
+    global flag
     for i in range(x, y, z):
         chain[0] = (255, i, 0)
         chain.write()
         time.sleep(0.01)
         if not touched():
             dfplayer.stop()
+            flag = False
+            dfplayer.set_volume(percent=100)
             break
-        playStory(2, 7)
+        if not flag:
+            playConfirmation() 
+            playStory(2, 7)
+            flag = True
 
 
 # Fade from blue to turqoise
@@ -45,9 +53,6 @@ def idle(x, y, z):
         chain.write()
         time.sleep(0.01)
         if touched():
-            dfplayer.set_volume(percent=100)
-            dfplayer.play(track=1)
-            dfplayer.set_volume(percent=40)
             fade(140, 255, 1)
             fade(255, 140, -1)
 
@@ -74,6 +79,12 @@ def playStory(a, b):
     i = random.randint(a, b)
     dfplayer.play(track=i)
     print("Play story")
+
+# Plays the confirmation sound
+def playConfirmation():
+    dfplayer.play(track=1)
+    time.sleep(2)
+    dfplayer.set_volume(percent=40)
 
 
 while True:
