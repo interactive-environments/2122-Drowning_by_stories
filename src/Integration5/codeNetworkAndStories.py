@@ -3,9 +3,8 @@ import adafruit_mpr121
 import adafruit_requests as requests
 import board
 import busio
-import p9813
-import random
 import time
+import neopixel
 
 from adafruit_esp32spi import adafruit_esp32spi
 from DFPlayer import DFPlayer
@@ -31,12 +30,13 @@ mpr121 = adafruit_mpr121.MPR121(i2c)
 PLAYER_VOL = 50
 dfplayer = DFPlayer(volume=PLAYER_VOL)
 
-# Setup chainable LED
-led1C = board.A0
-led1D = board.A1
-numLeds1 = 1
-chain = p9813.P9813(led1C, led1D, numLeds1)
+# Setup neopixels
+pixel_pin = board.A1
+num_pixels = 24
+pixels = neopixel.NeoPixel(pixel_pin, num_pixels, brightness=1.0, auto_write=False)
 
+
+# Setup global flags
 currZone = None
 flag = False
 
@@ -46,28 +46,34 @@ flag = False
 def fade(x, y, z):
     global flag, currZone
     for i in range(x, y, z):
-        chain[0] = (255, i, 0)
-        chain.write()
+        pixels.fill((255, i, 0))
+        pixels.show()
         time.sleep(0.01)
         if not touched():
             dfplayer.stop()
             flag = False
             break
         if not flag:
-            playConfirmation()
-            if currZone == 'NODE2':
-                playStory(2, 4)
+            if currZone == 'ESP02':
+                playConfirmation()
+                playStory(1)
+                time.sleep(30)
+                playStory(2)
+
                 flag = True
-            if currZone == 'NODE1':
-                playStory(5, 7)
+            if currZone == 'ESP01':
+                playConfirmation()
+                playStory(5)
+                time.sleep(30)
+                playStory(6)
                 flag = True
         checkNetwork()
 
 # Fade from blue to turqoise
 def idle(x, y, z):
     for i in range(x, y, z):
-        chain[0] = (0, 255, i)
-        chain.write()
+        pixels.fill((0, 255, i))
+        pixels.show()
         time.sleep(0.01)
         if touched():
             fade(140, 255, 1)
@@ -92,21 +98,20 @@ def touched():
 # Chooses a story randomly out of the given range and plays that story
 # a = from
 # b = to
-def playStory(a, b):
-    i = random.randint(a, b)
-    dfplayer.play(track=i)
+def playStory(a):
+    dfplayer.play(track=a)
     print("Play story")
-    
+
 # Plays the confirmation sound
 def playConfirmation():
     dfplayer.set_volume(percent=50)
-    dfplayer.play(track=1)
+    dfplayer.play(track=4)
     time.sleep(2)
     dfplayer.set_volume(percent=40)
 
 # Plays the story that corresponds to the closest network
 def checkNetwork():
-    global currZone
+    global currZone, flag
     closest = None
     closest_rssi = -80
 
@@ -116,9 +121,10 @@ def checkNetwork():
             dfplayer.stop()
             flag = False
             return
-        if str(entry["ssid"], "utf-8") == 'NODE2' or str(entry["ssid"], "utf-8") == 'NODE1':
-            now = time.monotonic()
-            new = False
+        if (
+            str(entry["ssid"], "utf-8") == 'ESP02' 
+            or str(entry["ssid"], "utf-8") == 'ESP01'
+        ):
             if str(entry["ssid"], "utf-8") == closest:
                 pass
             elif entry["rssi"] > closest_rssi:
@@ -129,13 +135,24 @@ def checkNetwork():
 
     print(closest)
     print(currZone)
-    # Set LED to the colour of the current broadcaster. Red for Iphone and blue for GNX7DE3F7
-    if closest == 'NODE2'and closest is not currZone:
+    # Set LED to the colour of the current broadcaster. 
+    # Red for Iphone and blue for GNX7DE3F7
+    if closest == 'ESP02' and closest is not currZone:
         playConfirmation()
-        playStory(2, 4)
-    if closest == 'NODE1'and closest is not currZone:
+        i = 0
+        playStory(1)
+        if i <= 1:
+            dfplayer.loop(on=True)
+            i = i + 1
+        dfplayer.loop(on=False)
+    if closest == 'ESP01' and closest is not currZone:
         playConfirmation()
-        playStory(5, 7)
+        i = 0
+        playStory(5)
+        if i <= 1:
+            dfplayer.loop(on=True)
+            i = i + 1
+        dfplayer.loop(on=False)
     currZone = closest
 
 
