@@ -57,15 +57,10 @@ def fade(x, y, z):
             if currZone == 'ESP02':
                 playConfirmation()
                 playStory(1)
-                time.sleep(30)
-                playStory(2)
-
                 flag = True
             if currZone == 'ESP01':
                 playConfirmation()
                 playStory(5)
-                time.sleep(30)
-                playStory(6)
                 flag = True
         checkNetwork()
 
@@ -141,18 +136,10 @@ def checkNetwork():
         playConfirmation()
         i = 0
         playStory(1)
-        if i <= 1:
-            dfplayer.loop(on=True)
-            i = i + 1
-        dfplayer.loop(on=False)
     if closest == 'ESP01' and closest is not currZone:
         playConfirmation()
         i = 0
         playStory(5)
-        if i <= 1:
-            dfplayer.loop(on=True)
-            i = i + 1
-        dfplayer.loop(on=False)
     currZone = closest
 
 
