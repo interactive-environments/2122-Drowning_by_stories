@@ -55,6 +55,20 @@ def fade():
         pixels.show()
         pixels1.show()
         time.sleep(0.1)
+    pixels.deinit()
+    pixels1.deinit()
+    pixels = neopixel.NeoPixel(
+        pixel_pin, 
+        num_pixels, 
+        brightness=0.02, 
+        auto_write=False
+    )
+    pixels1 = neopixel.NeoPixel(
+        pixel_pin1, 
+        num_pixels1, 
+        brightness=0.02, 
+        auto_write=False
+    )
     pixels.fill((255, 255, 255))
     pixels1.fill((255, 255, 255))
     pixels.show()
