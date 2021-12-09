@@ -55,6 +55,10 @@ def fade():
         pixels.show()
         pixels1.show()
         time.sleep(0.1)
+    pixels.fill((255, 255, 255))
+    pixels1.fill((255, 255, 255))
+    pixels.show()
+    pixels1.show()
 
 def fadeMin():
     global pixels, pixels1
@@ -84,10 +88,6 @@ def fadeMin():
 while True:
     if button.value and not flag:
         fade()
-        pixels.fill((255, 255, 255))
-        pixels1.fill((255, 255, 255))
-        pixels.show()
-        pixels1.show()
         flag = True
     elif not button.value and flag:
         fadeMin()
