@@ -1,0 +1,95 @@
+import board
+import neopixel
+import time
+from digitalio import DigitalInOut, Direction
+
+# ---------------------------------------------End library imports----------------------
+# Setup neopixel
+pixel_pin = board.A1
+num_pixels = 20
+pixels = neopixel.NeoPixel(pixel_pin, num_pixels, brightness=0, auto_write=False)
+
+# Setup neopixel1
+pixel_pin1 = board.A3
+num_pixels1 = 20
+pixels1 = neopixel.NeoPixel(pixel_pin1, num_pixels1, brightness=0, auto_write=False)
+
+# Setup button
+button = DigitalInOut(board.D0)
+button.direction = Direction.INPUT
+
+flag = False
+
+# ---------------------------------------------End Setup--------------------------------
+def range_f(start, stop, step):
+    x = start
+    while x <= stop:
+        yield x
+        x += step
+
+def range_fMin(start, stop, step):
+    x = start
+    while x >= stop:
+        yield x
+        x -= step
+
+def fade():
+    global pixels, pixels1
+    for i in range_f(0, 0.02, 0.001):
+        pixels.deinit()
+        pixels1.deinit()
+        pixels = neopixel.NeoPixel(
+            pixel_pin, 
+            num_pixels, 
+            brightness=i, 
+            auto_write=False
+        )
+        pixels1 = neopixel.NeoPixel(
+            pixel_pin1, 
+            num_pixels1, 
+            brightness=i, 
+            auto_write=False
+        )
+        pixels.fill((255, 255, 255))
+        pixels1.fill((255, 255, 255))
+        pixels.show()
+        pixels1.show()
+        time.sleep(0.1)
+
+def fadeMin():
+    global pixels, pixels1
+    for i in range_fMin(0.02, 0, 0.001):
+        pixels.deinit()
+        pixels1.deinit()
+        pixels = neopixel.NeoPixel(
+            pixel_pin, 
+            num_pixels, 
+            brightness=i, 
+            auto_write=False
+        )
+        pixels1 = neopixel.NeoPixel(
+            pixel_pin1, 
+            num_pixels1, 
+            brightness=i, 
+            auto_write=False
+        )
+        pixels.fill((255, 255, 255))
+        pixels1.fill((255, 255, 255))
+        pixels.show()
+        pixels1.show()
+        time.sleep(0.1)
+
+# ---------------------------------------------End helper methods-----------------------
+
+while True:
+    if button.value and not flag:
+        fade()
+        flag = True
+    elif not button.value and flag:
+        fadeMin()
+        flag = False
+    else:
+        pixels.fill((0, 0, 0))
+        pixels1.fill((0, 0, 0))
+        pixels.show()
+        pixels1.show()
