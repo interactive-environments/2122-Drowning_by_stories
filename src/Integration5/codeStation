@@ -55,24 +55,6 @@ def fade():
         pixels.show()
         pixels1.show()
         time.sleep(0.1)
-    pixels.deinit()
-    pixels1.deinit()
-    pixels = neopixel.NeoPixel(
-        pixel_pin, 
-        num_pixels, 
-        brightness=0.02, 
-        auto_write=False
-    )
-    pixels1 = neopixel.NeoPixel(
-        pixel_pin1, 
-        num_pixels1, 
-        brightness=0.02, 
-        auto_write=False
-    )
-    pixels.fill((255, 255, 255))
-    pixels1.fill((255, 255, 255))
-    pixels.show()
-    pixels1.show()
 
 def fadeMin():
     global pixels, pixels1
@@ -103,6 +85,11 @@ while True:
     if button.value and not flag:
         fade()
         flag = True
+    elif button.value and flag:
+        pixels.fill((255, 255, 255))
+        pixels1.fill((255, 255, 255))
+        pixels.show()
+        pixels1.show()
     elif not button.value and flag:
         fadeMin()
         flag = False
