@@ -55,12 +55,12 @@ def fade(x, y, z):
             break
         if not flag:
             if currZone == 'ESP02':
-                playConfirmation()
+                # playConfirmation()
                 playStory(1)
                 flag = True
             if currZone == 'ESP01':
-                playConfirmation()
-                playStory(5)
+                # playConfirmation()
+                playStory(2)
                 flag = True
         checkNetwork()
 
@@ -98,11 +98,11 @@ def playStory(a):
     print("Play story")
 
 # Plays the confirmation sound
-def playConfirmation():
-    dfplayer.set_volume(percent=50)
-    dfplayer.play(track=4)
-    time.sleep(2)
-    dfplayer.set_volume(percent=40)
+# def playConfirmation():
+#     dfplayer.set_volume(percent=50)
+#     dfplayer.play(track=4)
+#     time.sleep(2)
+#     dfplayer.set_volume(percent=40)
 
 # Plays the story that corresponds to the closest network
 def checkNetwork():
@@ -128,26 +128,21 @@ def checkNetwork():
             else:
                 continue
 
-    print(closest)
-    print(currZone)
-    # Set LED to the colour of the current broadcaster. 
-    # Red for Iphone and blue for GNX7DE3F7
+    # Play stories to the current broadcaster
     if closest == 'ESP02' and closest is not currZone:
-        playConfirmation()
-        i = 0
+        # playConfirmation()
         playStory(1)
     if closest == 'ESP01' and closest is not currZone:
-        playConfirmation()
-        i = 0
-        playStory(5)
+        # playConfirmation()
+        playStory(2)
     currZone = closest
 
 
 # ---------------------------------------------End helper methods-----------------------
 
 # Print all available wifi networks
-for ap in esp.scan_networks():
-    print("\t%s\t\tRSSI: %d" % (str(ap["ssid"], "utf-8"), ap["rssi"]))
+# for ap in esp.scan_networks():
+#     print("\t%s\t\tRSSI: %d" % (str(ap["ssid"], "utf-8"), ap["rssi"]))
 
 # Listening
 while True:
