@@ -1,0 +1,102 @@
+import adafruit_vl53l0x
+import board
+import busio
+import neopixel
+import time
+from digitalio import DigitalInOut, Direction
+
+# ---------------------------------------------End library imports----------------------
+# Setup neopixel
+pixel_pin = board.A1
+num_pixels = 35
+pixels = neopixel.NeoPixel(pixel_pin, num_pixels, brightness=0, auto_write=False)
+
+# Setup neopixel1
+pixel_pin1 = board.A3
+num_pixels1 = 35
+pixels1 = neopixel.NeoPixel(pixel_pin1, num_pixels1, brightness=0, auto_write=False)
+
+# Setup time of flight
+i2c = busio.I2C(board.SCL, board.SDA)
+sensor = adafruit_vl53l0x.VL53L0X(i2c)
+pin_clk = board.D2
+pin_data = board.D3
+
+flag = False
+
+# ---------------------------------------------End Setup--------------------------------
+def range_f(start, stop, step):
+    x = start
+    while x <= stop:
+        yield x
+        x += step
+
+def range_fMin(start, stop, step):
+    x = start
+    while x >= stop:
+        yield x
+        x -= step
+
+def fade():
+    global pixels, pixels1
+    for i in range_f(0, 0.02, 0.001):
+        pixels.deinit()
+        pixels1.deinit()
+        pixels = neopixel.NeoPixel(
+            pixel_pin,
+            num_pixels,
+            brightness=i,
+            auto_write=False
+        )
+        pixels1 = neopixel.NeoPixel(
+            pixel_pin1,
+            num_pixels1,
+            brightness=i,
+            auto_write=False
+        )
+        pixels.fill((255, 255, 255))
+        pixels1.fill((255, 255, 255))
+        pixels.show()
+        pixels1.show()
+
+def fadeMin():
+    global pixels, pixels1
+    for i in range_fMin(0.02, 0, 0.001):
+        pixels.deinit()
+        pixels1.deinit()
+        pixels = neopixel.NeoPixel(
+            pixel_pin,
+            num_pixels,
+            brightness=i,
+            auto_write=False
+        )
+        pixels1 = neopixel.NeoPixel(
+            pixel_pin1,
+            num_pixels1,
+            brightness=i,
+            auto_write=False
+        )
+        pixels.fill((255, 255, 255))
+        pixels1.fill((255, 255, 255))
+        pixels.show()
+        pixels1.show()
+
+# ---------------------------------------------End helper methods-----------------------
+
+while True:
+    if sensor.range < 2000 and not flag:
+        fade()
+        flag = True
+    elif sensor.range < 2000 and flag:
+        pixels.fill((255, 255, 255))
+        pixels1.fill((255, 255, 255))
+        pixels.show()
+        pixels1.show()
+    elif sensor.range > 2000 and flag:
+        fadeMin()
+        flag = False
+    else:
+        pixels.fill((0, 0, 0))
+        pixels1.fill((0, 0, 0))
+        pixels.show()
+        pixels1.show()
