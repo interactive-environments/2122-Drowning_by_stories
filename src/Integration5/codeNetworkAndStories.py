@@ -1,3 +1,4 @@
+# import adafruit_dotstar
 import adafruit_esp32spi.adafruit_esp32spi_socket as socket
 import adafruit_mpr121
 import adafruit_requests as requests
@@ -40,6 +41,10 @@ pixels = neopixel.NeoPixel(pixel_pin, num_pixels, brightness=0.9, auto_write=Fal
 currZone = None
 flag = False
 timePast = 0
+
+# Setup internal led
+# led = adafruit_dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1)
+# led.brightness = 0.3
 
 # ---------------------------------------------End Setup--------------------------------
 
@@ -111,7 +116,7 @@ def touched():
 # b = to
 def playStory(a, b):
     global timePast
-    timePast = time.monotonic()
+    timePast = time.time()
     i = random.randint(a, b)
     dfplayer.play(track=i)
     print("Play story")
@@ -144,16 +149,22 @@ def checkNetwork():
         ):
             if str(entry["ssid"], "utf-8") == closest:
                 pass
-            elif entry["rssi"] > closest_rssi and (timePast - 31000) <= 0:
-                closest = str(entry["ssid"], "utf-8")
-                closest_rssi = entry["rssi"]
+            elif entry["rssi"] > closest_rssi:
+                current = time.time()
+                print(timePast)
+                print(current)
+                if (current - timePast) >= 31:
+                    closest = str(entry["ssid"], "utf-8")
+                    closest_rssi = entry["rssi"]
 
     # Play stories to the current broadcaster
     if closest == "ESP02" and closest is not currZone:
         playConfirmation()
+        # led[0] = (255, 0, 0)
         playStory(1, 3)
     if closest == "ESP01" and closest is not currZone:
         playConfirmation()
+        # led[0] = (0, 0, 255)
         playStory(4, 6)
     # if closest == 'ESP03' and closest is not currZone:
     #         playConfirmation()
