@@ -1,4 +1,4 @@
-# import adafruit_dotstar
+import adafruit_dotstar
 import adafruit_esp32spi.adafruit_esp32spi_socket as socket
 import adafruit_mpr121
 import adafruit_requests as requests
@@ -43,8 +43,8 @@ flag = False
 timePast = 0
 
 # Setup internal led
-# led = adafruit_dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1)
-# led.brightness = 0.3
+led = adafruit_dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1)
+led.brightness = 0.3
 
 # ---------------------------------------------End Setup--------------------------------
 
@@ -132,27 +132,25 @@ def playConfirmation():
 
 # Plays the story that corresponds to the closest network
 def checkNetwork():
-    global currZone, flag, timePast
-    closest = None
+    global currZone, timePast
+    closest = currZone
     closest_rssi = -80
 
     # Check if the curren broadcaster is still the closest
     for entry in esp.scan_networks():
         if not touched():
-            dfplayer.stop()
-            flag = False
             return
         elif (
             str(entry["ssid"], "utf-8") == "ESP02"
             or str(entry["ssid"], "utf-8") == "ESP01"
             # or str(entry["ssid"], "utf-8") == 'ESP03'
         ):
+            print(closest)
+            print(str(entry["ssid"], "utf-8"))
             if str(entry["ssid"], "utf-8") == closest:
                 pass
             elif entry["rssi"] > closest_rssi:
                 current = time.time()
-#                 print(timePast)
-#                 print(current)
                 if (current - timePast) >= 31:
                     closest = str(entry["ssid"], "utf-8")
                     closest_rssi = entry["rssi"]
@@ -160,11 +158,11 @@ def checkNetwork():
     # Play stories to the current broadcaster
     if closest == "ESP02" and closest is not currZone:
         playConfirmation()
-        # led[0] = (255, 0, 0)
+        led[0] = (255, 0, 0)
         playStory(1, 3)
     if closest == "ESP01" and closest is not currZone:
         playConfirmation()
-        # led[0] = (0, 0, 255)
+        led[0] = (0, 0, 255)
         playStory(4, 6)
     # if closest == 'ESP03' and closest is not currZone:
     #         playConfirmation()
