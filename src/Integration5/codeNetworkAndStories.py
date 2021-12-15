@@ -151,7 +151,7 @@ def checkNetwork():
                 pass
             elif entry["rssi"] > closest_rssi:
                 current = time.time()
-                if (current - timePast) >= 32:
+                if (current - timePast) >= 31:
                     closest = str(entry["ssid"], "utf-8")
                     closest_rssi = entry["rssi"]
 
