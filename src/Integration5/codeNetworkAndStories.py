@@ -66,11 +66,11 @@ def fade(x, y, z):
         if not flag:
             if currZone == "ESP02":
                 playConfirmation()
-                playStory(1, 3)
+                playStory(5, 6)
                 flag = True
             if currZone == "ESP01":
                 playConfirmation()
-                playStory(4, 6)
+                playStory(2, 4)
                 flag = True
             # if currZone == 'ESP03':
         #                 playConfirmation()
@@ -125,7 +125,7 @@ def playStory(a, b):
 # Plays the confirmation sound
 def playConfirmation():
     dfplayer.set_volume(percent=100)
-    dfplayer.play(track=7)
+    dfplayer.play(track=1)
     time.sleep(2)
     dfplayer.set_volume(percent=80)
 
@@ -159,11 +159,11 @@ def checkNetwork():
     if closest == "ESP02" and closest is not currZone:
         playConfirmation()
         led[0] = (255, 0, 0)
-        playStory(1, 3)
+        playStory(5, 6)
     if closest == "ESP01" and closest is not currZone:
         playConfirmation()
         led[0] = (0, 0, 255)
-        playStory(4, 6)
+        playStory(2, 4)
     # if closest == 'ESP03' and closest is not currZone:
     #         playConfirmation()
     #         playStory(3)
