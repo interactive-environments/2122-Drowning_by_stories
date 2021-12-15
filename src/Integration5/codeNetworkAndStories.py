@@ -93,7 +93,6 @@ def idle(x, y, z):
             )
             fade(140, 255, 1)
             fade(255, 140, -1)
-        checkNetwork2()
 
 
 # Returns true when the touch sensor is being touched
@@ -168,33 +167,6 @@ def checkNetwork():
     # if closest == 'ESP03' and closest is not currZone:
     #         playConfirmation()
     #         playStory(3)
-    currZone = closest
-
-# Finds the closest network and updates currZone
-def checkNetwork2():
-    global currZone, timePast
-    closest = currZone
-    closest_rssi = -80
-
-    # Check if the curren broadcaster is still the closest
-    for entry in esp.scan_networks():
-        if not touched():
-            return
-        elif (
-            str(entry["ssid"], "utf-8") == "ESP02"
-            or str(entry["ssid"], "utf-8") == "ESP01"
-            # or str(entry["ssid"], "utf-8") == 'ESP03'
-        ):
-#             print(closest)
-#             print(str(entry["ssid"], "utf-8"))
-            if str(entry["ssid"], "utf-8") == closest:
-                continue
-            elif entry["rssi"] > closest_rssi:
-                current = time.time()
-                if (current - timePast) >= 31:
-                    closest = str(entry["ssid"], "utf-8")
-                    closest_rssi = entry["rssi"]
-
     currZone = closest
 
 # ---------------------------------------------End helper methods-----------------------
