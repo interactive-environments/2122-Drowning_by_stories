@@ -145,10 +145,10 @@ def checkNetwork():
             or str(entry["ssid"], "utf-8") == "ESP01"
             # or str(entry["ssid"], "utf-8") == 'ESP03'
         ):
-            print(closest)
-            print(str(entry["ssid"], "utf-8"))
+#             print(closest)
+#             print(str(entry["ssid"], "utf-8"))
             if str(entry["ssid"], "utf-8") == closest:
-                pass
+                continue
             elif entry["rssi"] > closest_rssi:
                 current = time.time()
                 if (current - timePast) >= 31:
