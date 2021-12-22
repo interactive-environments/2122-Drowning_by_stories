@@ -125,14 +125,14 @@ def playStory(a, b):
 # Plays the confirmation sound
 def playConfirmation():
     dfplayer.set_volume(percent=100)
-    dfplayer.play(track=1)
+    dfplayer.play(track=2)
     time.sleep(2)
     dfplayer.set_volume(percent=80)
     
 # Plays the new zone sound
 def playNewZone():
     dfplayer.set_volume(percent=100)
-    dfplayer.play(track=2)
+    dfplayer.play(track=1)
     time.sleep(2)
     dfplayer.set_volume(percent=80)
     
