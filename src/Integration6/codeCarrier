@@ -29,7 +29,7 @@ i2c = busio.I2C(board.SCL, board.SDA)
 mpr121 = adafruit_mpr121.MPR121(i2c)
 
 # Setup dfplayer
-PLAYER_VOL = 80
+PLAYER_VOL = 100
 dfplayer = DFPlayer(volume=PLAYER_VOL)
 
 # Setup neopixels
@@ -70,14 +70,13 @@ def fade(x, y, z):
                 flag = True
             if currZone == "ESP01":
                 playConfirmation()
-                playStory(3, 5)
+                playStory(4, 5)
                 flag = True
             # if currZone == 'ESP03':
         #                 playConfirmation()
         #                 playStory(5, 7)
         #                 flag = True
         checkNetwork()
-
 
 # Fade from blue to turqoise
 def idle(x, y, z):
@@ -119,28 +118,24 @@ def playStory(a, b):
     timePast = time.time()
     i = random.randint(a, b)
     dfplayer.play(track=i)
-    print("Play story")
 
 
 # Plays the confirmation sound
 def playConfirmation():
-    dfplayer.set_volume(percent=100)
     dfplayer.play(track=2)
-    time.sleep(2)
-    dfplayer.set_volume(percent=80)
+    time.sleep(4)
     
 # Plays the new zone sound
 def playNewZone():
-    dfplayer.set_volume(percent=100)
-    dfplayer.play(track=1)
-    time.sleep(2)
-    dfplayer.set_volume(percent=80)
+    dfplayer.play(track=3)
+    time.sleep(3)
+
     
 # Does all the tasks when there is a zone change
 def zoneChange():
-    playNewZone()
     pixels.fill((132, 0, 255))
     pixels.show()
+    playNewZone()
     time.sleep(0.05)
 
 
