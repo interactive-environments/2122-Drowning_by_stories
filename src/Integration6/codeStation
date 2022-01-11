@@ -1,75 +1,95 @@
-import adafruit_vl53l0x
-import board
-import busio
-import neopixel
-import time
-from digitalio import DigitalInOut, Direction
+#include "Adafruit_VL53L0X.h"
+#include "FastLED.h"
 
-# ---------------------------------------------End library imports----------------------
-# Setup neopixel
-pixel_pin = board.A1
-num_pixels = 20 #change to correct number of pixels
-pixels = neopixel.NeoPixel(pixel_pin, num_pixels, brightness=0, auto_write=False)
+#define NUM_LEDS 8
+#define DATA_PIN 3
 
-# Setup time of flight
-i2c = busio.I2C(board.SCL, board.SDA)
-sensor = adafruit_vl53l0x.VL53L0X(i2c)
-pin_clk = board.D2
-pin_data = board.D3
+// Define the array of leds
+CRGB leds[NUM_LEDS];
 
-flag = False
+Adafruit_VL53L0X lox = Adafruit_VL53L0X();
 
-# ---------------------------------------------End Setup--------------------------------
-def range_f(start, stop, step):
-    x = start
-    while x <= stop:
-        yield x
-        x += step
+boolean bla = false;
 
-def range_fMin(start, stop, step):
-    x = start
-    while x >= stop:
-        yield x
-        x -= step
+void setup() {
+  Serial.begin(115200);
 
-def fade():
-    global pixels, pixels1
-    for i in range_f(0, 0.02, 0.001):
-        pixels.deinit()
-        pixels = neopixel.NeoPixel(
-            pixel_pin,
-            num_pixels,
-            brightness=i,
-            auto_write=False
-        )
-        pixels.fill((255, 255, 255))
-        pixels.show()
+  FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
 
-def fadeMin():
-    global pixels, pixels1
-    for i in range_fMin(0.02, 0, 0.001):
-        pixels.deinit()
-        pixels = neopixel.NeoPixel(
-            pixel_pin,
-            num_pixels,
-            brightness=i,
-            auto_write=False
-        )
-        pixels.fill((255, 255, 255))
-        pixels.show()
+  // wait until serial port opens for native USB devices
+  while (! Serial) {
+    delay(1);
+  }
 
-# ---------------------------------------------End helper methods-----------------------
+  Serial.println("Adafruit VL53L0X test");
+  if (!lox.begin()) {
+    Serial.println(F("Failed to boot VL53L0X"));
+    while (1);
+  }
+  // power
+  Serial.println(F("VL53L0X API Simple Ranging example\n\n"));
+}
 
-while True:
-    if sensor.range < 2000 and not flag:
-        fade()
-        flag = True
-    elif sensor.range < 2000 and flag:
-        pixels.fill((255, 255, 255))
-        pixels.show()
-    elif sensor.range > 2000 and flag:
-        fadeMin()
-        flag = False
-    else:
-        pixels.fill((0, 0, 0))
-        pixels.show()
+// Function to fade up the led lights
+void fadeUp() {
+  for ( int j = 0; j <= 255; j++) {
+      for ( int i = 0; i < NUM_LEDS; i++ ) {
+        leds[i] = CRGB::White;
+        leds[i].maximizeBrightness(j);
+      }
+      FastLED.show();
+    }
+}
+
+// Function to fade down the led lights 
+void fadeDown() {
+  for ( int j = 255; j >= 0; j--) {
+      for ( int i = 0; i < NUM_LEDS; i++ ) {
+        leds[i] = CRGB::White;
+        leds[i].maximizeBrightness(j);
+      }
+      FastLED.show();
+    }
+}
+
+// Function to turn on the led lights
+void on() {
+  for (int i = 0; i < NUM_LEDS; i++) {
+      leds[i] = CRGB::White;
+      leds[i].maximizeBrightness(255);
+    }
+    FastLED.show();
+}
+
+// Function to turn off the led lights 
+void off() {
+  for (int i = 0; i < NUM_LEDS; i++) {
+      leds[i] = CRGB::Black;
+    }
+    FastLED.show();
+}
+
+
+void loop() {
+  VL53L0X_RangingMeasurementData_t measure;
+
+  Serial.print("Reading a measurement... ");
+  lox.rangingTest(&measure, false); // pass in 'true' to get debug data printout!
+
+  if (measure.RangeStatus != 4) {  // phase failures have incorrect data
+    Serial.print("Distance (mm): "); Serial.println(measure.RangeMilliMeter);
+  } else {
+    Serial.println(" out of range ");
+  }
+
+  if (measure.RangeMilliMeter < 2000 && !bla) {
+    fadeUp();
+    on();
+    bla = true;
+  } else if(measure.RangeMilliMeter > 2000 && bla) {
+    fadeDown();
+    off();
+    bla = false;
+  } 
+  delay(100);
+}
