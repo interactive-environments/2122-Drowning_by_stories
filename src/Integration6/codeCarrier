@@ -64,18 +64,18 @@ def fade(x, y, z):
             flag = False
             break
         if not flag:
-            if currZone == "ESP02":
-                playConfirmation()
-                playStory(6, 7)
-                flag = True
             if currZone == "ESP01":
                 playConfirmation()
-                playStory(4, 5)
+                playStory(3, 4)
                 flag = True
-            # if currZone == 'ESP03':
-        #                 playConfirmation()
-        #                 playStory(5, 7)
-        #                 flag = True
+            if currZone == "ESP02":
+                playConfirmation()
+                playStory(5, 6)
+                flag = True
+            if currZone == "ESP03":
+                playConfirmation()
+                playStory(7, 8)
+                flag = True
         checkNetwork()
 
 # Fade from blue to turqoise
@@ -116,21 +116,25 @@ def touched():
 def playStory(a, b):
     global timePast
     timePast = time.time()
-    i = random.randint(a, b)
+    i = random.choice([a, b])
     dfplayer.play(track=i)
 
 
 # Plays the confirmation sound
 def playConfirmation():
-    dfplayer.play(track=2)
+    dfplayer.set_volume(percent=80)
+    dfplayer.play(track=1)
     time.sleep(4)
-    
+    dfplayer.set_volume(percent=100)
+
 # Plays the new zone sound
 def playNewZone():
-    dfplayer.play(track=3)
+    dfplayer.set_volume(percent=50)
+    dfplayer.play(track=2)
     time.sleep(3)
+    dfplayer.set_volume(percent=100)
 
-    
+
 # Does all the tasks when there is a zone change
 def zoneChange():
     pixels.fill((132, 0, 255))
@@ -150,9 +154,9 @@ def checkNetwork():
         if not touched():
             return
         elif (
-            str(entry["ssid"], "utf-8") == "ESP02"
-            or str(entry["ssid"], "utf-8") == "ESP01"
-            # or str(entry["ssid"], "utf-8") == 'ESP03'
+            str(entry["ssid"], "utf-8") == "ESP01"
+            or str(entry["ssid"], "utf-8") == "ESP02"
+            or str(entry["ssid"], "utf-8") == "ESP03"
         ):
 #             print(closest)
 #             print(str(entry["ssid"], "utf-8"))
@@ -165,18 +169,18 @@ def checkNetwork():
                     closest_rssi = entry["rssi"]
 
     # Play stories to the current broadcaster
-    if closest == "ESP02" and closest is not currZone:
-        zoneChange()
-        led[0] = (255, 0, 0)
-        playStory(6, 7)
     if closest == "ESP01" and closest is not currZone:
         zoneChange()
+        led[0] = (255, 0, 0)
+        playStory(3, 4)
+    if closest == "ESP02" and closest is not currZone:
+        zoneChange()
         led[0] = (0, 0, 255)
-        playStory(3, 5)
-    # if closest == 'ESP03' and closest is not currZone:
-    #         zoneChange()
-#             led[0] = (0, 255, 0)
-    #         playStory(3)
+        playStory(5, 6)
+    if closest == "ESP03" and closest is not currZone:
+        zoneChange()
+        led[0] = (0, 255, 0)
+        playStory(7, 8)
     currZone = closest
 
 # ---------------------------------------------End helper methods-----------------------
