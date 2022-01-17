@@ -32,9 +32,9 @@ void setup() {
 
 // Function to fade up the led lights
 void fadeUp() {
-  for ( int j = 0; j <= 255; j++) {
+  for ( int j = 0; j <= 50; j++) {
       for ( int i = 0; i < NUM_LEDS; i++ ) {
-        leds[i] = CRGB::White;
+        leds[i] = CRGB::OrangeRed;
         leds[i].maximizeBrightness(j);
       }
       FastLED.show();
@@ -43,9 +43,9 @@ void fadeUp() {
 
 // Function to fade down the led lights 
 void fadeDown() {
-  for ( int j = 255; j >= 0; j--) {
+  for ( int j = 50; j >= 0; j--) {
       for ( int i = 0; i < NUM_LEDS; i++ ) {
-        leds[i] = CRGB::White;
+        leds[i] = CRGB::OrangeRed;
         leds[i].maximizeBrightness(j);
       }
       FastLED.show();
@@ -55,7 +55,7 @@ void fadeDown() {
 // Function to turn on the led lights
 void on() {
   for (int i = 0; i < NUM_LEDS; i++) {
-      leds[i] = CRGB::White;
+      leds[i] = CRGB::OrangeRed;
       leds[i].maximizeBrightness(255);
     }
     FastLED.show();
